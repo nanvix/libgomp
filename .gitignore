@@ -1,0 +1,50 @@
+#logs
+*err.txt
+*log.txt
+*.err
+*.log
+
+# Toolchain
+utils/toolchain
+
+# Doxygen
+doc/html
+doxygen.output
+
+# Build Files
+bin/
+lib/
+*.a
+*.img
+*.o
+
+# Output Files
+nanvix-cluster*
+
+# Ctags
+tags
+
+# IDEs
+*.json
+*.swp
+*.swo
+*.vscode/
+.clangd/
+
+# KLib Headers
+include/nanvix/barelib.h
+include/posix/decl.h
+include/posix/stdarg.h
+include/posix/stddef.h
+
+# Headers
+include/arch/
+include/dev/
+include/fs/
+include/grub/
+include/machine/
+include/nanvix/
+include/posix/
+
+# Excludes
+!img/*.img
