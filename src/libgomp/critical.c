@@ -32,16 +32,31 @@
 #include <nanvix/ulib.h>
 
 static gomp_mutex_t default_lock;
+static gomp_mutex_t single_lock;
+static int single_first=0;
 
 void
 GOMP_critical_start (void)
 {
+  
+  gomp_barrier_wait (&protectCriticalBarrier);
+  gomp_mutex_init (&single_lock);
+  gomp_mutex_lock (&single_lock);
+  if(single_first==0)
+  {
+    gomp_mutex_init (&default_lock);
+    single_first++;
+  }
+  gomp_barrier_wait (&protectCriticalBarrier);
+  gomp_mutex_unlock (&single_lock);
+
   gomp_mutex_lock (&default_lock);
 }
 
 void
 GOMP_critical_end (void)
 {
+  gomp_mutex_destroy (&single_lock);
   gomp_mutex_unlock (&default_lock);
 }
 
@@ -128,6 +143,7 @@ static gomp_mutex_t atomic_lock;
 void
 GOMP_atomic_start (void)
 {
+  gomp_mutex_init (&atomic_lock);
   gomp_mutex_lock (&atomic_lock);
 }
 
@@ -137,14 +153,3 @@ GOMP_atomic_end (void)
   gomp_mutex_unlock (&atomic_lock);
 }
 
-#if !GOMP_MUTEX_INIT_0
-static void __attribute__((constructor))
-initialize_critical (void)
-{
-  gomp_mutex_init (&default_lock);
-  gomp_mutex_init (&atomic_lock);
-#ifndef HAVE_SYNC_BUILTINS
-  gomp_mutex_init (&create_lock_lock);
-#endif
-}
-#endif

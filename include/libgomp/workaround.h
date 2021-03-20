@@ -92,5 +92,9 @@ extern void fputc(char str, void*);
 //extern int nanvix_mutex_trylock (nanvix_mutex_t *__mutex);
 //extern int nanvix_mutexattr_settype (pthread_mutexattr_t *__attr, int __kind);
 
+//critical lock global
+static struct nanvix_mutex default_lock;
+static struct nanvix_mutex atomic_lock;
+void initialize_critical (void);
 
 #endif

@@ -34,6 +34,20 @@ void hello(void)
 	uprintf("hello from thread %d", omp_get_thread_num());
 }
 
+void critical(void)
+{
+    #pragma omp parallel num_threads(THREAD_MAX)
+    {
+        #pragma omp critical
+        {
+            uprintf("hello from thread %d", omp_get_thread_num());
+            uprintf("hello from thread %d", omp_get_thread_num());
+            uprintf("hello from thread %d", omp_get_thread_num());
+            uprintf("hello from thread %d", omp_get_thread_num());
+        }
+    }
+}
+
 int __main2(int argc, const char *argv[])
 {
 	((void) argc);
