@@ -35,7 +35,7 @@
 #include <nanvix/sys/mutex.h>
 #include "workaround.h"
 
-typedef nanvix_mutex_t gomp_mutex_t;
+typedef struct nanvix_mutex gomp_mutex_t;
 
 #define GOMP_MUTEX_INIT_0 0
 

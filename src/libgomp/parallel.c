@@ -85,6 +85,7 @@ for (int i_tls=0;i_tls<100;i_tls++)
 {
     tls_omp[i_tls].data = NULL;
 }
+  gomp_barrier_init (&protectCriticalBarrier, num_threads);
   num_threads = gomp_resolve_num_threads (num_threads);
   gomp_team_start (fn, data, num_threads, NULL);
   fn (data);

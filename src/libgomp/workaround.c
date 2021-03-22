@@ -45,3 +45,9 @@ extern void fputc(char str, void* c)
 	(void) c;
 	uprintf("%s \n",__func__);
 }
+
+void initialize_critical (void)
+{
+  gomp_mutex_init (&default_lock);
+  gomp_mutex_init (&atomic_lock);
+}
