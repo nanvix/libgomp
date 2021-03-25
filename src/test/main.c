@@ -33,12 +33,12 @@ void parallel_for(void);
 
 int __main2(int argc, const char *argv[])
 {
-    ((void) argc);
-    ((void) argv);
+	((void) argc);
+	((void) argv);
 
     hello();
 
-    return (0);
+	return (0);
 }
 
 void hello(void)

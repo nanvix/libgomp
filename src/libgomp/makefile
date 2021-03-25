@@ -44,7 +44,7 @@ SRC = config/nanvix/sem.c  \
 	  single.c             \
 	  team.c               \
 	  work.c               \
-	  workaround.c
+	  workaround.c		   \
 
 OBJ = $(SRC:.c=.$(OBJ_SUFFIX).o)
 
