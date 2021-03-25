@@ -4,6 +4,7 @@
 
 #ifndef WORKAROUND_H
 #define WORKAROUND_H 1
+#define MAX_TLS_THREADS (20)
 typedef struct nanvix_mutex nanvix_mutex_t;
 typedef unsigned int pthread_key_t;
 
@@ -25,15 +26,6 @@ typedef unsigned int pthread_key_t;
 # define __SIZEOF_SEM_T	16
 #endif
 #define MEMMODEL_SYNC (1<<15)
-
-
-//struct tls_data
-//{
-//    kthread_t key;
-//    gomp_thread data;
-//}
-//tls_data* tls[THREAD_MAX];
-
 
 /* Memory model types for the __atomic* builtins.
    This must match the order in libstdc++-v3/include/bits/atomic_base.h.  */
@@ -65,13 +57,6 @@ typedef union
 
 
 
-/////end pthread types
-
-
-//extern int pthread_attr_getstacksize (pthread_attr_t *__attr,int * stacksize);
-//extern int pthread_attr_setstacksize (pthread_attr_t *__attr,size_t  stacksize);
-//
-
 extern void initialize_team (void);
 extern struct gomp_thread* pthread_getspecific (pthread_key_t key);
 
@@ -89,12 +74,11 @@ extern int pthread_detach (kthread_t __th);
 
 extern void fputs(char* str, void*);
 extern void fputc(char str, void*);
-//extern int nanvix_mutex_trylock (nanvix_mutex_t *__mutex);
-//extern int nanvix_mutexattr_settype (pthread_mutexattr_t *__attr, int __kind);
-
-//critical lock global
-static struct nanvix_mutex default_lock;
 static struct nanvix_mutex atomic_lock;
+static struct nanvix_mutex default_lock;
 void initialize_critical (void);
+
+/*Temporary solutuion to join threads*/
+kthread_t ** thread_pointer;
 
 #endif
