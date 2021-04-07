@@ -159,6 +159,7 @@ free_team (struct gomp_team *team)
   gomp_mutex_destroy (&team->work_share_lock);
   gomp_barrier_destroy (&team->barrier);
   gomp_sem_destroy (&team->master_release);
+  gomp_barrier_destroy(&protectCriticalBarrier);
   ufree (team);
 }
 
