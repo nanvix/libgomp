@@ -74,7 +74,7 @@ gomp_thread_start (void *xdata)
 #else
   struct gomp_thread local_thr;
   thr = &local_thr;
-  pthread_setspecific (/*gomp_tls_key*/kthread_self(), thr);
+  pthread_setspecific (kthread_self(), thr);
 
 #endif
   gomp_sem_init (&thr->release, 0);
@@ -121,7 +121,8 @@ gomp_thread_start (void *xdata)
 	}
       while (local_fn);
     }
-
+  //gambi master
+    kthread_join(*thread_pointer[kthread_self()-1],NULL);
   return NULL;
 }
 
@@ -159,7 +160,6 @@ free_team (struct gomp_team *team)
   gomp_mutex_destroy (&team->work_share_lock);
   gomp_barrier_destroy (&team->barrier);
   gomp_sem_destroy (&team->master_release);
-  gomp_barrier_destroy(&protectCriticalBarrier);
   ufree (team);
 }
 
@@ -234,6 +234,8 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
 	 threads from the dock, and those that aren't part of the 
 	 team will exit.  */
       gomp_threads_used = nthreads;
+      gomp_threads_used = 0;
+      //gambi
 
       /* Release existing idle threads.  */
       for (; i < n; ++i)
@@ -274,6 +276,8 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
       kthread_t pt;
       int err;
 
+      
+      thread_pointer[i] = umalloc(sizeof(kthread_t));
       start_data->ts.team = team;
       start_data->ts.work_share = work_share;
       start_data->ts.team_id = i;
@@ -283,7 +287,7 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
       start_data->fn_data = data;
       start_data->nested = nested;
 
-      err = kthread_create (&pt,
+      err = kthread_create (/*&pt*/thread_pointer[i],
 			    gomp_thread_start, (void*) (void*)start_data);
       if (err != 0)
 	gomp_fatal ("Thread creation failed: %s", ustrerror (err));
@@ -329,7 +333,7 @@ initialize_team (void)
 
   gomp_tls_key = kthread_self();
   pthread_key_create (&gomp_tls_key, NULL);
-  pthread_setspecific (gomp_tls_key, &initial_thread_tls_data);
+  pthread_setspecific (kthread_self(), &initial_thread_tls_data);
 #endif
 
 #ifdef HAVE_TLS

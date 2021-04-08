@@ -95,8 +95,14 @@ GOMP_parallel (void (*fn) (void *), void *data, unsigned num_threads,
 	       unsigned int flags)
 {
   num_threads = gomp_resolve_num_threads (num_threads);
+  
+  thread_pointer = umalloc(sizeof(kthread_t*)*num_threads);
+
   gomp_team_start (fn, data, num_threads, NULL);
   fn (data);
+  for (unsigned j=0;j<num_threads;j++)
+      ufree(thread_pointer[j]);
+  ufree(thread_pointer);
   GOMP_parallel_end ();
 }
 

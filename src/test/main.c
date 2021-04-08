@@ -36,7 +36,7 @@ int __main2(int argc, const char *argv[])
 	((void) argc);
 	((void) argv);
 
-    critical();
+    hello();
     hello();
 
 	return (0);
