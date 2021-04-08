@@ -30,7 +30,6 @@ int  pthread_key_delete (pthread_key_t  __key)
     for(int i=0;i<MAX_TLS_THREADS;i++)
     {
         tls_omp[i].key = 0;
-//		ufree(tls_omp[i].data);
     }
     return 0;
 }

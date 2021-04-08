@@ -78,7 +78,4 @@ static struct nanvix_mutex atomic_lock;
 static struct nanvix_mutex default_lock;
 void initialize_critical (void);
 
-/*Temporary solutuion to join threads*/
-kthread_t ** thread_pointer;
-
 #endif

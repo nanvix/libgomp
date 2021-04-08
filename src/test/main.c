@@ -29,6 +29,7 @@
 void hello(void);
 void atomic(void);
 void critical(void);
+void critical2(void);
 void parallel_for(void);
 
 int __main2(int argc, const char *argv[])
@@ -38,9 +39,6 @@ int __main2(int argc, const char *argv[])
 
     hello();
     hello();
-//#pragma omp parallel num_threads(3)
-//	uprintf("hello from thread %d of %d", omp_get_thread_num(),omp_get_num_threads());
-
 
 	return (0);
 }
@@ -73,6 +71,20 @@ void critical(void)
     }
     uprintf("Sum value of critical region is: %d", crit_count);
 }
+void critical2(void)
+{
+    int crit_count = 0;
+    int crit_sub = THREAD_MAX;
+    #pragma omp parallel num_threads(THREAD_MAX) shared(crit_count,crit_sub) default(none)
+    {
+        #pragma omp critical (name1)
+            crit_count++;
+        #pragma omp critical (name2)
+            crit_sub--;
+
+    }
+    uprintf("Sum value of critical region is: %d final decremet is %d", crit_count, crit_sub);
+}
 
 void parallel_for(void)
 {
@@ -81,11 +93,14 @@ void parallel_for(void)
 
     #pragma omp parallel num_threads(THREAD_MAX) firstprivate(pf_count) reduction(+:sum)
     {
-        #pragma omp for
+        #pragma omp for schedule(static,2)
         for(int i=0;i<100;i++)
         {
-            #pragma omp atomic
-            pf_count++;
+            for (int j=0;j<20;j++)
+            {
+                #pragma omp atomic
+                pf_count++;
+            }
         }
         sum += pf_count;
         uprintf("value in thread %d: %d",omp_get_thread_num(), pf_count);

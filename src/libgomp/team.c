@@ -58,8 +58,10 @@ struct gomp_thread_start_data
   bool nested;
 };
 
-/* This function is a pthread_create entry point.  This contains the idle
-   loop in which a thread waits to be called up to become part of a team.  */
+/* @brief This function is a pthread_create entry point.  This contains the idle
+   loop in which a thread waits to be called up to become part of a team.
+   @param xdata data from team of threads */
+
 
 static void *
 gomp_thread_start (void *xdata)
@@ -120,13 +122,14 @@ gomp_thread_start (void *xdata)
 	}
       while (local_fn);
     }
-  //gambi master
- //     if(omp_get_thread_num() == 0)
- //         kthread_exit(NULL);
   return NULL;
 }
 
-/* Create a new team data structure.  */
+/* @brief Create a new team data structure. 
+ * @param nthreads Number of threads of the team
+ * @param work_share Circular list to divide the threads work
+ * */
+
 static struct gomp_team *
 new_team (unsigned nthreads, struct gomp_work_share *work_share)
 {
@@ -165,6 +168,13 @@ free_team (struct gomp_team *team)
 
 
 /* Launch a team.  */
+/*
+ * @brief Launchs team of threads, and trigger its threads on team with thread creation or with thread recicle.
+ * @param fn function to run on its team
+ * @param data all data identifiers of the team, shared on threads of the team
+ * @param nthreads number of threads of current team 
+ * @param work_share A work_share circular list to divide the loops, iterations on the team.
+ * */
 void
 gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
 		 struct gomp_work_share *work_share)
@@ -183,6 +193,7 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
 
   /* DUMB initializer to a possible critical region used on critical constructor*/
   gomp_barrier_init (&protectCriticalBarrier, nthreads);
+  gomp_barrier_init (&protectAtomicBarrier, nthreads);
 
   thr = gomp_thread ();
   nested = thr->ts.team != NULL;
@@ -234,8 +245,6 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
 	 threads from the dock, and those that aren't part of the 
 	 team will exit.  */
       gomp_threads_used = nthreads;
-      //gomp_threads_used = 0;
-      //gambi
 
       /* Release existing idle threads.  */
       for (; i < n; ++i)
@@ -248,8 +257,10 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
 	  nthr->ts.static_trip = 0;
 	  nthr->fn = fn;
 	  nthr->data = data;
-      pthread_setspecific(i,nthr);
 	  team->ordered_release[i] = &nthr->release;
+      /* The follow update is necessary to idle threads being reused sums 1 because 
+       * of the thread key implement*/
+      pthread_setspecific(i+1,nthr);
 	}
 
       if (i == nthreads)
@@ -277,7 +288,6 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
       kthread_t pt;
       int err;
 
-      //thread_pointer[i-1] = umalloc(sizeof(kthread_t));
       start_data->ts.team = team;
       start_data->ts.work_share = work_share;
       start_data->ts.team_id = i;
@@ -288,7 +298,7 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
       start_data->nested = nested;
 
 
-      err = kthread_create (&pt/*thread_pointer[i]*/,
+      err = kthread_create (&pt,
 			    gomp_thread_start, (void*) (void*)start_data);
       if (err != 0)
 	gomp_fatal ("Thread creation failed: %s", ustrerror (err));
@@ -308,6 +318,9 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
 /* Terminate the current team.  This is only to be called by the master
    thread.  We assume that we must wait for the other threads.  */
 
+/*
+ * @brief Terminate the team and destroy mutexes of atomic and critical
+ * */
 void
 gomp_team_end (void)
 {
@@ -318,20 +331,17 @@ gomp_team_end (void)
 
   thr->ts = team->prev_ts;
   if(omp_get_thread_num() == 0)
-        gomp_barrier_destroy(&protectCriticalBarrier);
-
-  unsigned num_threads = omp_get_num_threads();
-  for (unsigned j=0;j<num_threads-1;j++)
   {
-      uprintf("thread = %d",omp_get_thread_num());
-     // kthread_join(*thread_pointer[j],NULL);
-     // ufree(thread_pointer[j]);
+        gomp_barrier_destroy(&protectCriticalBarrier);
+        gomp_barrier_destroy(&protectAtomicBarrier);
   }
-  //ufree(thread_pointer);
   free_team (team);
 }
 
 /* Constructors for this file.  */
+/*
+ * @brief constructor for the team and initializer of tls array
+ * */
 void
 initialize_team (void)
 {

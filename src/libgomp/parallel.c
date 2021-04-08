@@ -94,13 +94,9 @@ GOMP_parallel (void (*fn) (void *), void *data, unsigned num_threads,
 	       unsigned int flags)
 {
   num_threads = gomp_resolve_num_threads (num_threads);
-  
-//  thread_pointer = umalloc(sizeof(kthread_t*)*(num_threads-1));
-
   gomp_team_start (fn, data, num_threads, NULL);
   fn (data);
   GOMP_parallel_end ();
- // ufree(thread_pointer);
 }
 
 /* The public OpenMP API for thread and team related inquiries.  */
