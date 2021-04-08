@@ -5,8 +5,7 @@
 
    Libgomp is free software; you can redistribute it and/or modify it
    under the terms of the GNU Lesser General Public License as published by
-   the Free Software Foundation; either version 2.1 of the License, or
-   (at your option) any later version.
+   the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
 
    Libgomp is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
@@ -96,14 +95,12 @@ GOMP_parallel (void (*fn) (void *), void *data, unsigned num_threads,
 {
   num_threads = gomp_resolve_num_threads (num_threads);
   
-  thread_pointer = umalloc(sizeof(kthread_t*)*num_threads);
+//  thread_pointer = umalloc(sizeof(kthread_t*)*(num_threads-1));
 
   gomp_team_start (fn, data, num_threads, NULL);
   fn (data);
-  for (unsigned j=0;j<num_threads;j++)
-      ufree(thread_pointer[j]);
-  ufree(thread_pointer);
   GOMP_parallel_end ();
+ // ufree(thread_pointer);
 }
 
 /* The public OpenMP API for thread and team related inquiries.  */

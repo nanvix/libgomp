@@ -38,6 +38,9 @@ int __main2(int argc, const char *argv[])
 
     hello();
     hello();
+//#pragma omp parallel num_threads(3)
+//	uprintf("hello from thread %d of %d", omp_get_thread_num(),omp_get_num_threads());
+
 
 	return (0);
 }

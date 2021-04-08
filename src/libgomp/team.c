@@ -75,7 +75,6 @@ gomp_thread_start (void *xdata)
   struct gomp_thread local_thr;
   thr = &local_thr;
   pthread_setspecific (kthread_self(), thr);
-
 #endif
   gomp_sem_init (&thr->release, 0);
 
@@ -122,7 +121,8 @@ gomp_thread_start (void *xdata)
       while (local_fn);
     }
   //gambi master
-    kthread_join(*thread_pointer[kthread_self()-1],NULL);
+ //     if(omp_get_thread_num() == 0)
+ //         kthread_exit(NULL);
   return NULL;
 }
 
@@ -234,7 +234,7 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
 	 threads from the dock, and those that aren't part of the 
 	 team will exit.  */
       gomp_threads_used = nthreads;
-      gomp_threads_used = 0;
+      //gomp_threads_used = 0;
       //gambi
 
       /* Release existing idle threads.  */
@@ -248,11 +248,12 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
 	  nthr->ts.static_trip = 0;
 	  nthr->fn = fn;
 	  nthr->data = data;
+      pthread_setspecific(i,nthr);
 	  team->ordered_release[i] = &nthr->release;
 	}
 
       if (i == nthreads)
-	goto do_release;
+        goto do_release;
 
       /* If necessary, expand the size of the gomp_threads array.  It is
 	 expected that changes in the number of threads is rare, thus we
@@ -276,8 +277,7 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
       kthread_t pt;
       int err;
 
-      
-      thread_pointer[i] = umalloc(sizeof(kthread_t));
+      //thread_pointer[i-1] = umalloc(sizeof(kthread_t));
       start_data->ts.team = team;
       start_data->ts.work_share = work_share;
       start_data->ts.team_id = i;
@@ -287,7 +287,8 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
       start_data->fn_data = data;
       start_data->nested = nested;
 
-      err = kthread_create (/*&pt*/thread_pointer[i],
+
+      err = kthread_create (&pt/*thread_pointer[i]*/,
 			    gomp_thread_start, (void*) (void*)start_data);
       if (err != 0)
 	gomp_fatal ("Thread creation failed: %s", ustrerror (err));
@@ -319,6 +320,14 @@ gomp_team_end (void)
   if(omp_get_thread_num() == 0)
         gomp_barrier_destroy(&protectCriticalBarrier);
 
+  unsigned num_threads = omp_get_num_threads();
+  for (unsigned j=0;j<num_threads-1;j++)
+  {
+      uprintf("thread = %d",omp_get_thread_num());
+     // kthread_join(*thread_pointer[j],NULL);
+     // ufree(thread_pointer[j]);
+  }
+  //ufree(thread_pointer);
   free_team (team);
 }
 
