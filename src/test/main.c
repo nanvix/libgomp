@@ -24,37 +24,68 @@
 
 #include <nanvix/ulib.h>
 #include <nanvix/sys/thread.h>
-#include <nanvix/sys/condvar.h>
-#include <nanvix/sys/mutex.h>
 #include <libgomp/omp.h>
+
+void hello(void);
+void atomic(void);
+void critical(void);
+void parallel_for(void);
+
+int __main2(int argc, const char *argv[])
+{
+    ((void) argc);
+    ((void) argv);
+
+    hello();
+
+    return (0);
+}
 
 void hello(void)
 {
 	#pragma omp parallel num_threads(THREAD_MAX)
-	uprintf("hello from thread %d", omp_get_thread_num());
+	uprintf("hello from thread %d of %d", omp_get_thread_num(),omp_get_num_threads());
+}
+
+void atomic(void)
+{
+    int atom_count = 0;
+
+    #pragma omp parallel num_threads(THREAD_MAX) shared(atom_count)
+    {
+        #pragma omp atomic
+        atom_count++;
+    }
+    uprintf("Sum value of atomic critical region is: %d", atom_count);
 }
 
 void critical(void)
 {
-    #pragma omp parallel num_threads(THREAD_MAX)
+    int crit_count = 0;
+    #pragma omp parallel num_threads(THREAD_MAX) shared(crit_count) default(none)
     {
         #pragma omp critical
-        {
-            uprintf("hello from thread %d", omp_get_thread_num());
-            uprintf("hello from thread %d", omp_get_thread_num());
-            uprintf("hello from thread %d", omp_get_thread_num());
-            uprintf("hello from thread %d", omp_get_thread_num());
-        }
+            crit_count++;
     }
+    uprintf("Sum value of critical region is: %d", crit_count);
 }
 
-int __main2(int argc, const char *argv[])
+void parallel_for(void)
 {
-	((void) argc);
-	((void) argv);
+    int pf_count = 0;
+    int sum = 0;
 
-	hello();
+    #pragma omp parallel num_threads(THREAD_MAX) firstprivate(pf_count) reduction(+:sum)
+    {
+        #pragma omp for
+        for(int i=0;i<100;i++)
+        {
+            #pragma omp atomic
+            pf_count++;
+        }
+        sum += pf_count;
+        uprintf("value in thread %d: %d",omp_get_thread_num(), pf_count);
+    }
 
-	return (0);
+       uprintf("final value: %d", sum);
 }
-

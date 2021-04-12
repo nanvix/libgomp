@@ -180,6 +180,9 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
 
   /*end tls_init_vars*/
 
+  /* DUMB initializer to a possible critical region used on critical constructor*/
+  gomp_barrier_init (&protectCriticalBarrier, nthreads);
+
   thr = gomp_thread ();
   nested = thr->ts.team != NULL;
 
@@ -273,7 +276,6 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
       start_data->ts.team = team;
       start_data->ts.work_share = work_share;
       start_data->ts.team_id = i;
-      //uprintf("%d is my id\n",start_data->ts.team_id);
       start_data->ts.work_share_generation = 0;
       start_data->ts.static_trip = 0;
       start_data->fn = fn;
@@ -308,8 +310,9 @@ gomp_team_end (void)
 
   gomp_barrier_wait (&team->barrier);
 
-
   thr->ts = team->prev_ts;
+  if(omp_get_thread_num() == 0)
+        gomp_barrier_destroy(&protectCriticalBarrier);
 
   free_team (team);
 }

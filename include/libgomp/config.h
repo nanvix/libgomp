@@ -121,7 +121,7 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if the target supports thread-local storage. */
-#define HAVE_TLS 0
+//#define HAVE_TLS 0
 #undef HAVE_TLS 
 
 /* Define if uname is supported and struct utsname has nodename field. */

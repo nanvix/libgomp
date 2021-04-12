@@ -35,6 +35,11 @@
    SPECIFIED is a combination of the NUM_THREADS clause and the IF clause.
    If the IF clause is false, SPECIFIED is forced to 1.  When NUM_THREADS
    is not present, SPECIFIED is 0.  */
+/*
+ * @brief define number of threads on the region the current default value is 1 thread
+ * @param specified number of threads specified by the user
+ * */
+
 unsigned
 gomp_resolve_num_threads (unsigned specified)
 {
@@ -70,22 +75,25 @@ GOMP_parallel_start (void (*fn) (void *), void *data, unsigned num_threads)
   gomp_team_start (fn, data, num_threads, NULL);
 }
 
+/*
+ * @brief Calls the end of current team used in parallel region
+ * */
 void
 GOMP_parallel_end (void)
 {
   gomp_team_end ();
 }
 
+/*
+ * @brief Complete parallel region start and finish
+ * @param fn function called in parallel region equivalent of parallel region block
+ * @param data pointer of thread data
+ * @param num_threads number of threads working on parallel region
+ * */
 void
 GOMP_parallel (void (*fn) (void *), void *data, unsigned num_threads,
 	       unsigned int flags)
 {
-
-for (int i_tls=0;i_tls<100;i_tls++)
-{
-    tls_omp[i_tls].data = NULL;
-}
-  gomp_barrier_init (&protectCriticalBarrier, num_threads);
   num_threads = gomp_resolve_num_threads (num_threads);
   gomp_team_start (fn, data, num_threads, NULL);
   fn (data);
@@ -94,6 +102,9 @@ for (int i_tls=0;i_tls<100;i_tls++)
 
 /* The public OpenMP API for thread and team related inquiries.  */
 
+/*
+ * @brief returns the number of threads on a region
+ * */
 int
 omp_get_num_threads (void)
 {
@@ -110,6 +121,9 @@ omp_get_max_threads (void)
   return gomp_resolve_num_threads (0);
 }
 
+/*
+ * @brief returns the thread id
+ * */
 int
 omp_get_thread_num (void)
 {

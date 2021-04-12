@@ -237,15 +237,11 @@ struct tls_data
  kthread_t key;
  struct gomp_thread * data;
 };
-struct tls_data tls_omp[100];
+struct tls_data tls_omp[MAX_TLS_THREADS];
 
 static inline struct gomp_thread * gomp_thread (void)
 {
-  for(int i=0;i<100;i++)
-      if(tls_omp[i].key==kthread_self())
-        return tls_omp[i].data;
-
-  return  (NULL);
+    return pthread_getspecific(kthread_self());
 }
 #endif
 
@@ -265,8 +261,8 @@ extern unsigned long gomp_run_sched_chunk;
 
 /* alloc.c */
 
-extern void *gomp_malloc (size_t) __attribute__((malloc));
-extern void *gomp_malloc_cleared (size_t) __attribute__((malloc));
+extern void *gomp_malloc (size_t);
+extern void *gomp_malloc_cleared (size_t);
 extern void *gomp_realloc (void *, size_t);
 
 /* Avoid conflicting prototypes of alloca() in system headers by using
