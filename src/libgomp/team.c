@@ -58,8 +58,10 @@ struct gomp_thread_start_data
   bool nested;
 };
 
-/* This function is a pthread_create entry point.  This contains the idle
-   loop in which a thread waits to be called up to become part of a team.  */
+/* @brief This function is a pthread_create entry point.  This contains the idle
+   loop in which a thread waits to be called up to become part of a team.
+   @param xdata data from team of threads */
+
 
 static void *
 gomp_thread_start (void *xdata)
@@ -74,8 +76,7 @@ gomp_thread_start (void *xdata)
 #else
   struct gomp_thread local_thr;
   thr = &local_thr;
-  pthread_setspecific (/*gomp_tls_key*/kthread_self(), thr);
-
+  pthread_setspecific (kthread_self(), thr);
 #endif
   gomp_sem_init (&thr->release, 0);
 
@@ -121,11 +122,14 @@ gomp_thread_start (void *xdata)
 	}
       while (local_fn);
     }
-
   return NULL;
 }
 
-/* Create a new team data structure.  */
+/* @brief Create a new team data structure. 
+ * @param nthreads Number of threads of the team
+ * @param work_share Circular list to divide the threads work
+ * */
+
 static struct gomp_team *
 new_team (unsigned nthreads, struct gomp_work_share *work_share)
 {
@@ -164,6 +168,13 @@ free_team (struct gomp_team *team)
 
 
 /* Launch a team.  */
+/*
+ * @brief Launchs team of threads, and trigger its threads on team with thread creation or with thread recicle.
+ * @param fn function to run on its team
+ * @param data all data identifiers of the team, shared on threads of the team
+ * @param nthreads number of threads of current team 
+ * @param work_share A work_share circular list to divide the loops, iterations on the team.
+ * */
 void
 gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
 		 struct gomp_work_share *work_share)
@@ -182,6 +193,7 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
 
   /* DUMB initializer to a possible critical region used on critical constructor*/
   gomp_barrier_init (&protectCriticalBarrier, nthreads);
+  gomp_barrier_init (&protectAtomicBarrier, nthreads);
 
   thr = gomp_thread ();
   nested = thr->ts.team != NULL;
@@ -246,10 +258,13 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
 	  nthr->fn = fn;
 	  nthr->data = data;
 	  team->ordered_release[i] = &nthr->release;
+      /* The follow update is necessary to idle threads being reused sums 1 because 
+       * of the thread key implement*/
+      pthread_setspecific(i+1,nthr);
 	}
 
       if (i == nthreads)
-	goto do_release;
+        goto do_release;
 
       /* If necessary, expand the size of the gomp_threads array.  It is
 	 expected that changes in the number of threads is rare, thus we
@@ -282,6 +297,7 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
       start_data->fn_data = data;
       start_data->nested = nested;
 
+
       err = kthread_create (&pt,
 			    gomp_thread_start, (void*) (void*)start_data);
       if (err != 0)
@@ -302,6 +318,9 @@ gomp_team_start (void (*fn) (void *), void *data, unsigned nthreads,
 /* Terminate the current team.  This is only to be called by the master
    thread.  We assume that we must wait for the other threads.  */
 
+/*
+ * @brief Terminate the team and destroy mutexes of atomic and critical
+ * */
 void
 gomp_team_end (void)
 {
@@ -312,12 +331,17 @@ gomp_team_end (void)
 
   thr->ts = team->prev_ts;
   if(omp_get_thread_num() == 0)
+  {
         gomp_barrier_destroy(&protectCriticalBarrier);
-
+        gomp_barrier_destroy(&protectAtomicBarrier);
+  }
   free_team (team);
 }
 
 /* Constructors for this file.  */
+/*
+ * @brief constructor for the team and initializer of tls array
+ * */
 void
 initialize_team (void)
 {
@@ -328,7 +352,7 @@ initialize_team (void)
 
   gomp_tls_key = kthread_self();
   pthread_key_create (&gomp_tls_key, NULL);
-  pthread_setspecific (gomp_tls_key, &initial_thread_tls_data);
+  pthread_setspecific (kthread_self(), &initial_thread_tls_data);
 #endif
 
 #ifdef HAVE_TLS

@@ -46,8 +46,8 @@ GOMP_critical_start (void)
 void
 GOMP_critical_end (void)
 {
-  gomp_mutex_unlock (&default_lock);
-  gomp_barrier_wait (&protectCriticalBarrier);
+    gomp_mutex_unlock (&default_lock);
+    gomp_barrier_wait (&protectCriticalBarrier);
 }
 
 #ifndef HAVE_SYNC_BUILTINS
@@ -136,7 +136,7 @@ GOMP_atomic_start (void)
   /* Grants a critical protection initialize before threads launch*/
     if(omp_get_thread_num() == 0)
         gomp_mutex_init (&atomic_lock);
-    gomp_barrier_wait (&protectCriticalBarrier);
+    gomp_barrier_wait (&protectAtomicBarrier);
     gomp_mutex_lock (&atomic_lock);
 }
 

@@ -320,6 +320,7 @@ extern void gomp_work_share_end_nowait (void);
 
 /* a barrier to protect the change of critical region */
 gomp_barrier_t protectCriticalBarrier;
+gomp_barrier_t protectAtomicBarrier;
 
 #ifdef HAVE_ATTRIBUTE_VISIBILITY
 # pragma GCC visibility pop

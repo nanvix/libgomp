@@ -20,8 +20,8 @@ int  pthread_key_create (pthread_key_t * key,void (*destructor)(void*))
 {
    for(int i=0;i<MAX_TLS_THREADS;i++)
    {
-        tls_omp[i].key = (kthread_t) i;
-        tls_omp[i].data = NULL;
+		tls_omp[i].key = (kthread_t) i;
+		tls_omp[i].data = NULL;
    }
    return 0;
 }
@@ -30,7 +30,6 @@ int  pthread_key_delete (pthread_key_t  __key)
     for(int i=0;i<MAX_TLS_THREADS;i++)
     {
         tls_omp[i].key = 0;
-        tls_omp[i].data = NULL;
     }
     return 0;
 }
