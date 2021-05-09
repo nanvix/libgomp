@@ -33,3 +33,13 @@ int  pthread_key_delete (pthread_key_t  __key)
     }
     return 0;
 }
+void initialize_critical (void)
+{
+    gomp_mutex_init(&default_lock);
+    gomp_mutex_init(&atomic_lock);
+}
+void destroy_critical (void)
+{
+    gomp_mutex_destroy(&default_lock);
+    gomp_mutex_destroy(&atomic_lock);
+}

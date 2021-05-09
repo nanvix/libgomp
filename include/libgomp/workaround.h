@@ -43,19 +43,12 @@ enum memmodel
   MEMMODEL_SYNC_SEQ_CST = MEMMODEL_SEQ_CST | MEMMODEL_SYNC,
   /* Say that all the higher bits are valid target extensions.  */
 //  MEMMODEL_MAX = INTTYPE_MAXIMUM (int)
-  MEMMODEL_MAX = 0x80000U
+  MEMMODEL_MAX = 0x800000U
 };
 
 
 ////pthread types////
 typedef struct nanvix_mutex pthread_mutex_t;
-typedef union
-{
-  char __size[__SIZEOF_SEM_T];
-  long int __align;
-} sem_t;
-
-
 
 extern void initialize_team (void);
 extern struct gomp_thread* pthread_getspecific (pthread_key_t key);
@@ -77,5 +70,6 @@ extern void fputc(char str, void*);
 static struct nanvix_mutex atomic_lock;
 static struct nanvix_mutex default_lock;
 void initialize_critical (void);
+void destroy_critical (void);
 
 #endif

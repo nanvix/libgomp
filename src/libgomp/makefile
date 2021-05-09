@@ -39,6 +39,7 @@ SRC = config/nanvix/sem.c  \
 	  critical.c           \
 	  env.c                \
 	  error.c              \
+	  ordered.c            \
 	  loop.c               \
 	  parallel.c           \
 	  single.c             \

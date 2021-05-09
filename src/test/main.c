@@ -38,7 +38,6 @@ int __main2(int argc, const char *argv[])
 	((void) argv);
 
     hello();
-    hello();
 
 	return (0);
 }
