@@ -34,6 +34,7 @@ ARCHIVE = $(LIBGOMP)
 SRC = config/nanvix/sem.c  \
 	  config/nanvix/proc.c \
 	  config/nanvix/bar.c  \
+	  config/nanvix/lock.c \
 	  alloc.c              \
 	  barrier.c            \
 	  critical.c           \

@@ -30,21 +30,12 @@
 
 #ifndef _LIBGOMP_OMP_LOCK_DEFINED
 #define _LIBGOMP_OMP_LOCK_DEFINED 1
+
 /* These two structures get edited by the libgomp build process to
    reflect the shape of the two types.  Their internals are private
    to the library.  */
+#include "omp-lock.h"
 
-typedef struct
-{
-  unsigned char _x[4] 
-    __attribute__((__aligned__(4)));
-} omp_lock_t;
-
-typedef struct
-{
-  unsigned char _x[8] 
-    __attribute__((__aligned__(4)));
-} omp_nest_lock_t;
 #endif
 
 #ifdef __cplusplus
