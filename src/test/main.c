@@ -32,15 +32,92 @@ void critical(void);
 void critical2(void);
 void parallel_for(void);
 
-int __main2(int argc, const char *argv[])
-{
-	((void) argc);
-	((void) argv);
+kthread_t tid[THREAD_MAX];
 
-    hello();
+//int __main2(int argc, const char *argv[])
+//{
+//  ((void) argc);
+//  ((void) argv);
+//
+//    hello();
+//
+//  return (0);
+//}
 
-	return (0);
+int __main2() {
+    int n, i;
+    int thread_count;
+    int factor;
+    int sum = 0;
+    thread_count = 4;
+    n = 1000000;
+
+#pragma omp parallel for default(none) num_threads(thread_count) shared(n) private(factor) reduction(+:sum) 
+    for (i = 0; i < n; i++)
+    {
+        factor = (i % 2 == 0) ? 1 : -1;
+        sum += 10000000*factor/(2*i+1);
+    }
+
+    sum = 4*sum;
+    uprintf("With n = %d terms and %d threads,\n", n, thread_count);
+    uprintf("   Our estimate of pi = %d\n", sum);
+    return (0);
 }
+
+//int thread_count;
+//int n;
+//int sum;
+//
+//void* Local_pi(void * rank)
+//{
+//   int my_rank = (int) rank;
+//   int factor;
+//   int i;
+//   int my_n = n/thread_count;
+//   int my_first_i = my_n*my_rank;
+//   int my_last_i = my_first_i + my_n;
+//
+//   if (my_first_i % 2 == 0)
+//      factor = 1;
+//   else
+//      factor = -1;
+//
+//   for (i = my_first_i; i < my_last_i; i++, factor = -factor) {
+//      sum += 1000000*factor/(2*i+1);  
+//   }
+//
+//   return NULL;
+//}
+//
+//int __main2() {
+//
+//    int time_start,time_final;
+//    n = 10000000;
+//    thread_count = THREAD_MAX;
+//    sum = 0;
+//
+//   int       thread;  /* Use int in case of a 64-bit system */
+//   kthread_t* thread_handles;
+//   thread_handles = (kthread_t*) umalloc (thread_count*sizeof(kthread_t)); 
+//
+//   time_start = perf_start(0,0);
+//   for (thread = 0; thread < thread_count; thread++)  
+//      kthread_create(&thread_handles[thread],
+//          Local_pi, (void*)thread);  
+//
+//   for (thread = 0; thread < thread_count; thread++) 
+//      kthread_join(thread_handles[thread], NULL); 
+//   time_final = perf_read(0);
+//
+//   sum = 4*sum;
+//   uprintf("With n = %d terms,\n", n);
+//   uprintf("   Our estimate of pi = %d\n", sum);
+//   uprintf("performance with %d threads  = %d",thread_count,time_final-time_start);
+//   
+//   ufree(thread_handles);
+//   return (0);
+//}
 
 void hello(void)
 {
