@@ -48,20 +48,30 @@ int __main2() {
     int n, i;
     int thread_count;
     int factor;
-    int sum = 0;
+    int sum;
+    int soma_escalabilidade=0;
+    uint64_t time_start,time_final;
     thread_count = 4;
-    n = 1000000;
-
+    n = 10000000;
+    for (int j =0;j<10;j++)
+    {
+        sum = 0;
+        time_start = clock_read();
 #pragma omp parallel for default(none) num_threads(thread_count) shared(n) private(factor) reduction(+:sum) 
     for (i = 0; i < n; i++)
     {
         factor = (i % 2 == 0) ? 1 : -1;
-        sum += 10000000*factor/(2*i+1);
+        sum += 1000000*factor/(2*i+1);
     }
-
+    time_final = clock_read();
+    soma_escalabilidade+=(time_final-time_start);
+    }
     sum = 4*sum;
+    int avr_result = soma_escalabilidade/10;
+
     uprintf("With n = %d terms and %d threads,\n", n, thread_count);
     uprintf("   Our estimate of pi = %d\n", sum);
+    uprintf("time of execution: %d",(int)(avr_result));
     return (0);
 }
 
@@ -93,27 +103,33 @@ int __main2() {
 //int __main2() {
 //
 //    int time_start,time_final;
-//    n = 10000000;
-//    thread_count = THREAD_MAX;
+//    n = 10000000/4;
+//    thread_count = 3;
 //    sum = 0;
 //
-//   int       thread;  /* Use int in case of a 64-bit system */
-//   kthread_t* thread_handles;
-//   thread_handles = (kthread_t*) umalloc (thread_count*sizeof(kthread_t)); 
+//    int soma_escalabilidade = 0;
+//    int       thread;  /* Use int in case of a 64-bit system */
+//    kthread_t* thread_handles;
+//    thread_handles = (kthread_t*) umalloc (thread_count*sizeof(kthread_t)); 
 //
-//   time_start = perf_start(0,0);
-//   for (thread = 0; thread < thread_count; thread++)  
-//      kthread_create(&thread_handles[thread],
-//          Local_pi, (void*)thread);  
+//    for (int j =0;j<10;j++)
+//    {
+//    time_start = clock_read();
+//    for (thread = 0; thread < thread_count; thread++)  
+//       kthread_create(&thread_handles[thread],
+//           Local_pi, (void*)thread);  
 //
-//   for (thread = 0; thread < thread_count; thread++) 
-//      kthread_join(thread_handles[thread], NULL); 
-//   time_final = perf_read(0);
+//    for (thread = 0; thread < thread_count; thread++) 
+//       kthread_join(thread_handles[thread], NULL); 
+//    time_final = clock_read();
+//    soma_escalabilidade+=(time_final-time_start);
+//    }
+//    int avr_result = soma_escalabilidade/10;
 //
 //   sum = 4*sum;
 //   uprintf("With n = %d terms,\n", n);
 //   uprintf("   Our estimate of pi = %d\n", sum);
-//   uprintf("performance with %d threads  = %d",thread_count,time_final-time_start);
+//   uprintf("time of execution: %d",(int)(avr_result));
 //   
 //   ufree(thread_handles);
 //   return (0);
@@ -165,11 +181,11 @@ void critical2(void)
 void parallel_for(void)
 {
     int pf_count = 0;
-    int sum = 0;
+    int sum_pf = 0;
 
-    #pragma omp parallel num_threads(THREAD_MAX) firstprivate(pf_count) reduction(+:sum)
+    #pragma omp parallel num_threads(THREAD_MAX) firstprivate(pf_count) reduction(+:sum_pf)
     {
-        #pragma omp for schedule(static,2)
+        #pragma omp for schedule(guided,2)
         for(int i=0;i<100;i++)
         {
             for (int j=0;j<20;j++)
@@ -178,9 +194,9 @@ void parallel_for(void)
                 pf_count++;
             }
         }
-        sum += pf_count;
+        sum_pf += pf_count;
         uprintf("value in thread %d: %d",omp_get_thread_num(), pf_count);
     }
 
-       uprintf("final value: %d", sum);
+       uprintf("final value: %d", sum_pf);
 }
