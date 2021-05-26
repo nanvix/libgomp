@@ -32,7 +32,8 @@ include $(BUILDDIR)/makefile.config
 EXEC = libgomp-tests.$(OBJ_SUFFIX)
 
 # C Source Files
-SRC = $(wildcard *.c)
+#SRC = $(wildcard *.c)
+SRC = omp_mat_vect_rand_split.c
 
 # Object Files
 OBJ = $(SRC:.c=.$(OBJ_SUFFIX).o)

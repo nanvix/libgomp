@@ -34,29 +34,20 @@ void parallel_for(void);
 
 kthread_t tid[THREAD_MAX];
 
-//int __main2(int argc, const char *argv[])
-//{
-//  ((void) argc);
-//  ((void) argv);
-//
-//    hello();
-//
-//  return (0);
-//}
 
-int __main2() {
+
+int __main2(){
+
     int n, i;
     int thread_count;
     int factor;
     int sum;
-    int soma_escalabilidade=0;
+    int difTime=0;
     uint64_t time_start,time_final;
-    thread_count = 4;
-    n = 10000000;
-    for (int j =0;j<10;j++)
-    {
-        sum = 0;
-        time_start = clock_read();
+    thread_count = 3;
+    n = 4*100000000;
+    sum = 0;
+    time_start = clock_read();
 #pragma omp parallel for default(none) num_threads(thread_count) shared(n) private(factor) reduction(+:sum) 
     for (i = 0; i < n; i++)
     {
@@ -64,20 +55,21 @@ int __main2() {
         sum += 1000000*factor/(2*i+1);
     }
     time_final = clock_read();
-    soma_escalabilidade+=(time_final-time_start);
-    }
+    difTime+=(time_final-time_start);
+    //}
     sum = 4*sum;
-    int avr_result = soma_escalabilidade/10;
 
-    uprintf("With n = %d terms and %d threads,\n", n, thread_count);
+    uprintf("With n = %d terms\n", n);
     uprintf("   Our estimate of pi = %d\n", sum);
-    uprintf("time of execution: %d",(int)(avr_result));
+    uprintf("time of execution: %d",(int)(difTime));
     return (0);
+
 }
 
 //int thread_count;
 //int n;
 //int sum;
+//struct nanvix_mutex protectSum;
 //
 //void* Local_pi(void * rank)
 //{
@@ -87,15 +79,17 @@ int __main2() {
 //   int my_n = n/thread_count;
 //   int my_first_i = my_n*my_rank;
 //   int my_last_i = my_first_i + my_n;
+//   int my_sum=0;
 //
-//   if (my_first_i % 2 == 0)
-//      factor = 1;
-//   else
-//      factor = -1;
+//   factor = (my_first_i % 2 == 0) ? 1 : -1;
 //
 //   for (i = my_first_i; i < my_last_i; i++, factor = -factor) {
-//      sum += 1000000*factor/(2*i+1);  
+//        my_sum += 1000000*factor/(2*i+1);  
 //   }
+//
+//   nanvix_mutex_lock(&protectSum);
+//       sum += my_sum;
+//   nanvix_mutex_unlock(&protectSum);
 //
 //   return NULL;
 //}
@@ -103,33 +97,32 @@ int __main2() {
 //int __main2() {
 //
 //    int time_start,time_final;
-//    n = 10000000/4;
-//    thread_count = 3;
+//    n = 2*100000000;
+//    thread_count = 2;
 //    sum = 0;
+//    nanvix_mutex_init(&protectSum,NULL);
 //
 //    int soma_escalabilidade = 0;
 //    int       thread;  /* Use int in case of a 64-bit system */
 //    kthread_t* thread_handles;
 //    thread_handles = (kthread_t*) umalloc (thread_count*sizeof(kthread_t)); 
 //
-//    for (int j =0;j<10;j++)
-//    {
 //    time_start = clock_read();
-//    for (thread = 0; thread < thread_count; thread++)  
-//       kthread_create(&thread_handles[thread],
-//           Local_pi, (void*)thread);  
+//    for (thread = 0; thread < thread_count-1; thread++)  
+//       kthread_create(&thread_handles[thread],Local_pi, (void*)thread+1);  
+//    
+//    Local_pi((void*)0);
 //
-//    for (thread = 0; thread < thread_count; thread++) 
+//    for (thread = 0; thread < thread_count-1; thread++) 
 //       kthread_join(thread_handles[thread], NULL); 
 //    time_final = clock_read();
 //    soma_escalabilidade+=(time_final-time_start);
-//    }
-//    int avr_result = soma_escalabilidade/10;
 //
+//    nanvix_mutex_destroy(&protectSum);
 //   sum = 4*sum;
 //   uprintf("With n = %d terms,\n", n);
 //   uprintf("   Our estimate of pi = %d\n", sum);
-//   uprintf("time of execution: %d",(int)(avr_result));
+//   uprintf("time of execution: %d",(int)(soma_escalabilidade));
 //   
 //   ufree(thread_handles);
 //   return (0);
