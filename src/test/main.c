@@ -44,8 +44,8 @@ int __main2(){
     int sum;
     int difTime=0;
     uint64_t time_start,time_final;
-    thread_count = 5;
-    n = 4*100000000;
+    thread_count = 3;
+    n = 3*100000000;
     sum = 0;
     time_start = clock_read();
 #pragma omp parallel for default(none) num_threads(thread_count) shared(n) private(factor) reduction(+:sum) 
