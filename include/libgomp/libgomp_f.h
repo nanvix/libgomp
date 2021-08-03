@@ -41,33 +41,30 @@ typedef union { omp_lock_t *lock; uint64_t u; } *omp_lock_arg_t;
 # define omp_lock_arg(arg) ((arg)->lock)
 # endif
 
-#if (16 == 8) \
-    && (8 <= 16)
-# define OMP_NEST_LOCK_DIRECT
-typedef omp_nest_lock_t *omp_nest_lock_arg_t;
-# define omp_nest_lock_arg(arg) (arg)
-#else
-typedef union { omp_nest_lock_t *lock; uint64_t u; } *omp_nest_lock_arg_t;
-# define omp_nest_lock_arg(arg) ((arg)->lock)
-# endif
-
-#if (4 == 4) \
-    && (4 <= 4)
-# define OMP_LOCK_25_DIRECT
-typedef omp_lock_25_t *omp_lock_25_arg_t;
-# define omp_lock_25_arg(arg) (arg)
-#else
-typedef union { omp_lock_25_t *lock; uint64_t u; } *omp_lock_25_arg_t;
-# define omp_lock_25_arg(arg) ((arg)->lock)
-# endif
-
-#if (8 == 8) \
-    && (4 <= 8)
-# define OMP_NEST_LOCK_25_DIRECT
-typedef omp_nest_lock_25_t *omp_nest_lock_25_arg_t;
-# define omp_nest_lock_25_arg(arg) (arg)
-#else
-typedef union { omp_nest_lock_25_t *lock; uint64_t u; } *omp_nest_lock_25_arg_t;
-# define omp_nest_lock_25_arg(arg) ((arg)->lock)
-# endif
+//#if (16 == 8) && (8 <= 16)
+//# define OMP_NEST_LOCK_DIRECT
+//typedef omp_nest_lock_t *omp_nest_lock_arg_t;
+//# define omp_nest_lock_arg(arg) (arg)
+//#else
+//typedef union { omp_nest_lock_t *lock; uint64_t u; } *omp_nest_lock_arg_t;
+//# define omp_nest_lock_arg(arg) ((arg)->lock)
+//# endif
+//
+//#if (4 == 4)  && (4 <= 4)
+//# define OMP_LOCK_25_DIRECT
+//typedef omp_lock_25_t *omp_lock_25_arg_t;
+//# define omp_lock_25_arg(arg) (arg)
+//#else
+//typedef union { omp_lock_25_t *lock; uint64_t u; } *omp_lock_25_arg_t;
+//# define omp_lock_25_arg(arg) ((arg)->lock)
+//# endif
+//
+//#if (8 == 8) && (4 <= 8)
+//# define OMP_NEST_LOCK_25_DIRECT
+//typedef omp_nest_lock_25_t *omp_nest_lock_25_arg_t;
+//# define omp_nest_lock_25_arg(arg) (arg)
+//#else
+//typedef union { omp_nest_lock_25_t *lock; uint64_t u; } *omp_nest_lock_25_arg_t;
+//# define omp_nest_lock_25_arg(arg) ((arg)->lock)
+//# endif
 #endif /* LIBGOMP_F_H */

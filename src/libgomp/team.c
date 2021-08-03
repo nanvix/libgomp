@@ -45,7 +45,7 @@ static gomp_barrier_t gomp_threads_dock;
 #ifdef HAVE_TLS
 __thread struct gomp_thread gomp_tls_data;
 #else
-kthread_t gomp_tls_key = 0;
+kthread_t gomp_tls_key;
 #endif
 
 /* This structure is used to communicate across pthread_create.  */

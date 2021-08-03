@@ -33,18 +33,18 @@
 /* These two structures get edited by the libgomp build process to 
    reflect the shape of the two types.  Their internals are private
    to the library.  */
-
-typedef struct
-{
-  unsigned char _x[@OMP_LOCK_SIZE@] 
-    __attribute__((__aligned__(@OMP_LOCK_ALIGN@)));
-} omp_lock_t;
-
-typedef struct
-{
-  unsigned char _x[@OMP_NEST_LOCK_SIZE@] 
-    __attribute__((__aligned__(@OMP_NEST_LOCK_ALIGN@)));
-} omp_nest_lock_t;
+#include <libgomp/omp-lock.h>
+//typedef struct
+//{
+//  unsigned char _x[@OMP_LOCK_SIZE@] 
+//    __attribute__((__aligned__(@OMP_LOCK_ALIGN@)));
+//} omp_lock_t;
+//
+//typedef struct
+//{
+//  unsigned char _x[@OMP_NEST_LOCK_SIZE@] 
+//    __attribute__((__aligned__(@OMP_NEST_LOCK_ALIGN@)));
+//} omp_nest_lock_t;
 #endif
 
 #ifdef __cplusplus

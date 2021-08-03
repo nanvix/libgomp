@@ -34,17 +34,21 @@ ARCHIVE = $(LIBGOMP)
 SRC = config/nanvix/sem.c  \
 	  config/nanvix/proc.c \
 	  config/nanvix/bar.c  \
+	  config/nanvix/lock.c \
 	  alloc.c              \
 	  barrier.c            \
 	  critical.c           \
 	  env.c                \
 	  error.c              \
+	  ordered.c            \
 	  loop.c               \
 	  parallel.c           \
 	  single.c             \
 	  team.c               \
 	  work.c               \
 	  workaround.c		   \
+	  iter.c 			   \
+	  sections.c 		   \
 
 OBJ = $(SRC:.c=.$(OBJ_SUFFIX).o)
 
